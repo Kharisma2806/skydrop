@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <title>Skydrop</title>
+  </head>
+  <body>
+    <div class="game-intro">
+      <img src="./images/rooster-chicken-logo.jpg" alt="" class="logo-img" />
+      <br />
+      <button id="start-button">Start Game</button>
+      <div>
+        <img src="./images/arrows.png" alt="" class="arrows-img" />
+        <p>Use the left and right arrow to control the chicken!</p>
+      </div>
+    </div>
+    <div class="timer-and-score">
+      <div id="timer">Time left: 60 seconds</div>
+      <div id="score">Score: 0</div>
+    </div>
+    <div id="game-board">
+      <canvas id="canvas" width="800" height="500"></canvas>
+    </div>
+    <script src="js/index.js" type="module"></script>
+  </body>
+</html>
