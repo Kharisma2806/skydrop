@@ -23,8 +23,9 @@ rottenegg.src = "./images/bad-egg.png";
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-
 function startGame() {
+
+  let isJumping = false;
 
   // Clear the canvas and redraw the images
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -39,6 +40,9 @@ function startGame() {
   const rottenEgg = new badEgg(0, 0, 0, 0, ctx);
   ctx.drawImage(rottenegg, rottenEgg.x, rottenEgg.y, rottenEgg.width, rottenEgg.height);
   
+  let myAudio = document.getElementById("sound")
+  myAudio.play();
+
   let score = 0;
   const scoreElement = document.getElementById("score");
 
@@ -49,12 +53,11 @@ function startGame() {
   timerElement.textContent = `Time: ${timer}`;
 
   let dy = 0;
-  let isJumping = false;
 
   // Add an event listener to listen for keyboard input
   function playerListener() {
     document.addEventListener('keydown', (event) => {
-      //console.log(event);
+    event.preventDefault();
       switch (event.code) {
         case "ArrowLeft":
           if (player.x > 0) {
@@ -73,6 +76,7 @@ function startGame() {
           }
           break;
       }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(coopbackground, 0, 0, canvas.width, canvas.height);
       ctx.drawImage(chicken, player.x, player.y, player.width, player.height);
@@ -102,6 +106,10 @@ function checkCollision() {
     //console.log('Collision detected');
     score++;
     scoreElement.textContent = `Score: ${score}`;
+
+    const soundEffect = new Audio('../sounds/collect-ring-15982 (2).mp3');
+    soundEffect.play();
+
     return true;
   }
   return false;
@@ -136,6 +144,10 @@ function checkRottenEggCollision() {
       rottenEgg.y < player.y + player.height &&
       rottenEgg.x + rottenEgg.width > player.x &&
       rottenEgg.x < player.x + player.width) {
+
+        const soundEffect2 = new Audio('../sounds/button-124476.mp3');
+    soundEffect2.play();
+
     //console.log('Collision detected');
     return true;
   }
@@ -163,8 +175,14 @@ const timerInterval = setInterval(() => {
 }, 1000);
 
 function jump() {
-  dy = -10; // set the initial velocity of the jump
-}
+    dy = -10;
+    setTimeout(() => {
+      dy = 10;
+      isJumping = false; // Set isJumping to false when the player lands
+    }, 500);
+     const jumpSound = new Audio('../sounds/cartoon-jump-6462.mp3');
+     jumpSound.play();
+  }
 
 function move() {
   dy += 0.5; // add gravity to the velocity
@@ -191,7 +209,6 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-
-  playerListener(); 
+  playerListener(); // Call the function after it has been defined
   gameLoop(); // start the game loop
 }
