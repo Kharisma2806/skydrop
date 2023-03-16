@@ -19,6 +19,9 @@ class Player {
   moveRight() {
     this.x += 20;
   }
+
+  // Add the jump. JUMP needs to decrease y. Example this.y -= 20. we want it to go up for a while (very short, 300ms) and then increase it for another 300ms
+  // setInverval setTimeout. 
 } 
 
 export default Player;

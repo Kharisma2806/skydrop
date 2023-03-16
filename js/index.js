@@ -20,29 +20,11 @@ chicken.src = "./images/hen.png";
 freshegg.src = "./images/goodegg.png";
 rottenegg.src = "./images/bad-egg.png";
 
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
 
 function startGame() {
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  
-  let score = 0;
-  const scoreElement = document.getElementById("score");
-
-  let timer = 60;
-  const timerElement = document.getElementById("timer");
-  timerElement.textContent = `Time: ${timer}`;
-
-  // Decrement the timer every second and update the timer display element
-  const intervalId = setInterval(() => {
-    timer--;
-    timerElement.textContent = `Time: ${timer}`;
-    if (timer <= 0) {
-      clearInterval(intervalId);
-      alert(`Time's up! Your score is ${score}.`);
-      return;
-    }
-  }, 1000);
-
 
   // Clear the canvas and redraw the images
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -56,6 +38,18 @@ function startGame() {
 
   const rottenEgg = new badEgg(0, 0, 0, 0, ctx);
   ctx.drawImage(rottenegg, rottenEgg.x, rottenEgg.y, rottenEgg.width, rottenEgg.height);
+  
+  let score = 0;
+  const scoreElement = document.getElementById("score");
+
+  let rottenEggCount = 0;
+
+  let timer = 60;
+  const timerElement = document.getElementById("timer");
+  timerElement.textContent = `Time: ${timer}`;
+
+  let dy = 0;
+  let isJumping = false;
 
   // Add an event listener to listen for keyboard input
   function playerListener() {
@@ -72,6 +66,12 @@ function startGame() {
             player.moveRight();
           }
           break;
+        case "Space":
+          if (!isJumping) {
+          isJumping = true;
+          jump();
+          }
+          break;
       }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(coopbackground, 0, 0, canvas.width, canvas.height);
@@ -81,25 +81,30 @@ function startGame() {
     });
   }
 
-  // Add new code to randomly generate freshEgg
   function generateFreshEgg() {
-  freshEgg.y += 8; // set the speed of falling
+  freshEgg.y += 4; // set the speed of falling
   if (freshEgg.y > canvas.height) { // check if the egg has reached the bottom of the canvas
     freshEgg.y = -60; // reset the egg to the top of the canvas
     freshEgg.x = Math.floor(Math.random() * (canvas.width - freshEgg.width)); // set a random x-coordinate for the egg
   }
-  checkCollision();
+  if (checkCollision()) {
+    // if there is a collision, remove the egg from the canvas
+    freshEgg.y = -60;
+    freshEgg.x = -60;
+  }
 }
 
 function checkCollision() {
-  if (freshEgg.y + freshEgg.height >= player.y &&
-      freshEgg.y <= player.y + player.height &&
-      freshEgg.x + freshEgg.width >= player.x &&
-      freshEgg.x <= player.x + player.width) {
+  if (freshEgg.y + freshEgg.height > player.y &&
+      freshEgg.y < player.y + player.height &&
+      freshEgg.x + freshEgg.width > player.x &&
+      freshEgg.x < player.x + player.width) {
     //console.log('Collision detected');
     score++;
     scoreElement.textContent = `Score: ${score}`;
+    return true;
   }
+  return false;
 }
   
   setInterval(() => { // Call the generateFreshEgg function every 50 milliseconds
@@ -107,17 +112,86 @@ function checkCollision() {
   }, 50);
 
   function generateRottenEgg() {
-    rottenEgg.y += 8; // set the speed of falling
-    if (rottenEgg.y > canvas.height) { // check if the egg has reached the bottom of the canvas
-      rottenEgg.y = -60; // reset the egg to the top of the canvas
-      rottenEgg.x = Math.floor(Math.random() * (canvas.width - rottenEgg.width)); // set a random x-coordinate for the egg
+  rottenEgg.y += 8; // set the speed of falling
+  if (rottenEgg.y > canvas.height) { // check if the egg has reached the bottom of the canvas
+    rottenEgg.y = -60; // reset the egg to the top of the canvas
+    rottenEgg.x = Math.floor(Math.random() * (canvas.width - rottenEgg.width)); // set a random x-coordinate for the egg
+  }
+  if (checkRottenEggCollision()) {
+    // if there is a collision, remove the egg from the canvas and increment the rottenEggCount
+    rottenEgg.y = -60;
+    rottenEgg.x = -60;
+    rottenEggCount++;
+    if (rottenEggCount >= 3) {
+      clearInterval(freshEggInterval);
+      clearInterval(rottenEggInterval);
+      clearInterval(timerInterval);
+      alert(`Game over! You caught 3 rotten eggs under 1 minute.`);
     }
   }
+}
 
-  setInterval(() => { // Call the generateFreshEgg function every 80 milliseconds
-    generateRottenEgg();
-  }, 80);
-  
-  // SET INTERVAL THT CHANGES THE INNERHTML or INNETEXT of #timer (query selector)
-  playerListener() // Call the function after it has been defined
+function checkRottenEggCollision() {
+  if (rottenEgg.y + rottenEgg.height > player.y &&
+      rottenEgg.y < player.y + player.height &&
+      rottenEgg.x + rottenEgg.width > player.x &&
+      rottenEgg.x < player.x + player.width) {
+    //console.log('Collision detected');
+    return true;
+  }
+  return false;
+}
+
+const freshEggInterval = setInterval(() => { // Call the generateFreshEgg function every 50 milliseconds
+  generateFreshEgg();
+}, 50);
+
+const rottenEggInterval = setInterval(() => { // Call the generateFreshEgg function every 80 milliseconds
+  generateRottenEgg();
+}, 80);
+
+const timerInterval = setInterval(() => {
+  timer--;
+  timerElement.textContent = `Time: ${timer}`;
+  if (timer <= 0) {
+    clearInterval(freshEggInterval);
+    clearInterval(rottenEggInterval);
+    clearInterval(timerInterval);
+    alert(`Time's up! Your score is ${score}.`);
+    return;
+  }
+}, 1000);
+
+function jump() {
+  dy = -10; // set the initial velocity of the jump
+}
+
+function move() {
+  dy += 0.5; // add gravity to the velocity
+  player.y += dy; // update the vertical position
+  if (player.y + player.height > canvas.height) { // check if the player has hit the ground
+    player.y = canvas.height - player.height; // reset the player's position to the ground
+    dy = 0; // reset the velocity
+    isJumping = false; // reset the jumping flag
+  }
+}
+
+function gameLoop() {
+  // update the player's position
+  move();
+
+  // draw the game elements
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(coopbackground, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(chicken, player.x, player.y, player.width, player.height);
+  ctx.drawImage(freshegg, freshEgg.x, freshEgg.y, freshEgg.width, freshEgg.height);
+  ctx.drawImage(rottenegg, rottenEgg.x, rottenEgg.y, rottenEgg.width, rottenEgg.height);
+
+  // continue the game loop
+  requestAnimationFrame(gameLoop);
+}
+
+
+  playerListener(); 
+  gameLoop(); // start the game loop
 }
