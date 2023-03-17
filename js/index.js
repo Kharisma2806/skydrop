@@ -52,7 +52,7 @@ function startGame() {
   const timerElement = document.getElementById("timer");
   timerElement.textContent = `Time: ${timer}`;
 
-  let dy = 0;
+  let velocity = 0;
 
   // Add an event listener to listen for keyboard input
   function playerListener() {
@@ -175,9 +175,9 @@ const timerInterval = setInterval(() => {
 }, 1000);
 
 function jump() {
-    dy = -10;
+    velocity = -10;
     setTimeout(() => {
-      dy = 10;
+      velocity = 10;
       isJumping = false; // Set isJumping to false when the player lands
     }, 500);
      const jumpSound = new Audio('../sounds/cartoon-jump-6462.mp3');
@@ -185,11 +185,11 @@ function jump() {
   }
 
 function move() {
-  dy += 0.5; // add gravity to the velocity
-  player.y += dy; // update the vertical position
+  velocity += 0.5; // add gravity to the velocity
+  player.y += velocity; // update the vertical position
   if (player.y + player.height > canvas.height) { // check if the player has hit the ground
     player.y = canvas.height - player.height; // reset the player's position to the ground
-    dy = 0; // reset the velocity
+    velocity = 0; // reset the velocity
     isJumping = false; // reset the jumping flag
   }
 }
