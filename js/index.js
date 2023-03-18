@@ -75,7 +75,19 @@ function startGame() {
           jump();
           }
           break;
-      }
+        case "KeyA":
+         if (player.x > 0) {
+         player.moveLeft();
+         }
+         player.jumpLeft();
+         break;
+        case "KeyD":
+         if (player.x < canvas.width - player.width) {
+         player.moveRight();
+         }
+         player.jumpRight();
+         break;
+         }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(coopbackground, 0, 0, canvas.width, canvas.height);
@@ -189,10 +201,35 @@ function move() {
   player.y += velocity; // update the vertical position
   if (player.y + player.height > canvas.height) { // check if the player has hit the ground
     player.y = canvas.height - player.height; // reset the player's position to the ground
-    velocity = 0; // reset the velocity
-    isJumping = false; // reset the jumping flag
   }
 }
+
+Player.prototype.jumpLeft = function() {
+  if (!isJumping) {
+    isJumping = true;
+    velocity = -10;
+    setTimeout(() => {
+      velocity = 10;
+      isJumping = false;
+    }, 500);
+    const jumpSound = new Audio('../sounds/cartoon-jump-6462.mp3');
+    jumpSound.play();
+  }
+};
+
+Player.prototype.jumpRight = function() {
+  if (!isJumping) {
+    isJumping = true;
+    velocity = -10;
+    setTimeout(() => {
+      velocity = 10;
+      isJumping = false;
+    }, 500);
+    const jumpSound = new Audio('../sounds/cartoon-jump-6462.mp3');
+    jumpSound.play();
+  }
+};
+
 
 function gameLoop() {
   // update the player's position
